@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+*.log
+
+# Claude Code のローカル実行キャッシュ
+.claude/
+.claude.json
+</content>

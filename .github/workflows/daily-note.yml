@@ -1,0 +1,57 @@
+name: Daily Note Generation
+
+on:
+  schedule:
+    # 10:00 JST = 01:00 UTC
+    - cron: '0 1 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: daily-note-generation
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Generate note
+        id: generate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: bash scripts/generate-note.sh
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "note-auto-bot"
+          git config user.email "note-auto-bot@users.noreply.github.com"
+          git add topics.md drafts/
+          git commit -m "chore: 自動生成note記事を追加"
+          git push
+</content>
