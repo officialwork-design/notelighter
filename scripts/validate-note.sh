@@ -55,4 +55,3 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
 fi
 
 exit 0
-</content>

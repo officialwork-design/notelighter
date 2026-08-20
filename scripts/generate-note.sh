@@ -70,4 +70,3 @@ fi
 
 echo "記事の生成と検証が完了しました。"
 exit 0
-</content>
